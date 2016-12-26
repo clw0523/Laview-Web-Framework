@@ -1,0 +1,30 @@
+
+* 20140805 修改
+
+	* 考虑到安全性与性能问题，本项功能默认是关闭，如果需要开启，请使用下面方法
+	
+		GlobalConfig.setOpenDirectToJsp(true);
+
+* 对于一些非常简单的请求，直接映射到  jsp 文件，而不需要 action
+
+	* 直接映射的  jsp 文件格式定义为：
+	
+		__<名称>.jsp
+
+		即前面有两个下划线
+
+	* 请求的格式
+	
+		/<app_context>/<jsp 相对于 views 的路径>/jsp_名称
+	
+	
+	* 例如
+	
+			/shopwifi/admin/table/index  --> 对应目录文件   views/table/__index.jsp 
+		
+		注意，要带下划线
+		
+		
+		
+		
+		

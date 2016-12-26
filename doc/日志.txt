@@ -1,0 +1,103 @@
+
+* 2015-01-26
+
+	* 添加注解 @Before , @After 。提供更细粒度的拦截
+
+* 2014-12-17
+
+	* 添加一个新的注入参数： PrintWriter。  action 请求方法可以使用此参数
+
+* 2014-10-20
+
+	* 引入一个辅助类： com.macroview.web.util.WebRequestDataMap
+	
+		* 对于一些请求，还没有办法确定请求转入的数据 Bean，想暂时放到一个 Map 中去，这个类就有用。
+		
+		 这是一个 Map，并且提供方法转换为 Bean.
+
+* 2014-05-24
+
+	* 开始 v1.7.x 的工作， 1.7.x 主要是支持  Servlet 3.x -- 也就是要求 Tomcat 必须为 7
+
+* 2014-05-20
+
+	* 升级到  v1.6.4  -- 完成  @SessionValue 
+
+	* 往  Request 中添加一个内置变量：  BaseContextPath
+	
+		* 我们可以在  JSP 中使用   ${BaseContextPath} 替代 <c:url value='/'/>
+		
+			例子： href="${BaseContextPath}/login"
+
+* 2014-05-19 
+
+	* 想法。。。还是加入 @SessionValue 注解
+	
+	* 想法。。。加入 @ActionBefore 和  @ActionAfter 两个 --- 用来做什么呢？
+
+* 2014-05-13
+
+	* 将 @ServletInit 和 @ServletDestroy 删除，改为通过事件方式进行处理
+	
+		* 相应的事件为：ServletInitEvent, ServletDestroyEvent
+		
+		* 使用 @Observers 来绑定侦听事件
+
+* 2014-05-10
+
+	* 在 @WebBean 的取值中，添加可以从  Cookie 中取值
+	
+	* 添加注解 @CookieValue 到参数。 action 的方法，可以使用 @CookieValue 来从 Cookie 中获取数据
+
+* 2014-04-27 
+
+	* 完成了 @WebBean 注解类的注解信息扫描代码
+	
+	* 下一步，将是处理 参数值装配 问题
+
+	* 数据组装流程
+	
+		* ActionExecuteProxy  -- 执行代理，代理 Action 的执行
+		
+			* ActionMethodParameterHandler  --- Action 参数的信息获取、分析
+			
+				* WebResolveArgumentFactory  --- 不同类型的参数的处理工厂，调用不同的参数处理类，来处理不同类型的参数
+				
+					* BaseTypeResolveArgument  --  Java 基础数据类型参数处理（如 String, Integer等）
+					
+					* CommonTypeResolveArgument -- Java 类库中定义 的一些类型参数（如 BigDecimal等）
+					
+					* WebStandardTypeResolveArgument -- Request 和 Response 的注入
+					
+					* WebSimpleDataResolveArgument  -- Pojo 类注入
+
+
+* 需要在类 HandlerMethodInvoker#resolveHandlerArgument 中添加 URL 参数注入的功能    -- 完成 
+
+* 添加 Upload File 支持 -- 完成
+
+* 添加 Download File 支持 -- 完成
+
+	* 使用方法：
+	
+		public FileDownloadResult downloadMethod(...){
+			....
+		}
+		
+		只需要返回一个 FileDownloadResult 接口的实现即可。
+
+* 支持  @Get/@Post 等   --- 完成
+
+* 支持 SpringMVC
+
+	@Controller
+	@RequestMapping(value="/xx") --- 方式测试
+
+    --- 完成
+
+* Action:/action  方式跳转到另一个 Action
+
+
+
+
+
