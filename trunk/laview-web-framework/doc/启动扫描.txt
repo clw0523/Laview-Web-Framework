@@ -1,0 +1,29 @@
+框架默认扫描的包是：com.laview
+
+
+
+
+
+可以在web.xml中添加
+	<context-param>
+    	<param-name>contextBeanLocation</param-name>
+    	<param-value>
+			com.laview2
+		</param-value>
+  	</context-param>
+
+指定扫描的包。
+
+
+这句是启动扫描器。
+WebApplicationContext.createApplicationContext(new String[]{"com.laview"});
+
+
+
+
+
+
+
+
+
+
