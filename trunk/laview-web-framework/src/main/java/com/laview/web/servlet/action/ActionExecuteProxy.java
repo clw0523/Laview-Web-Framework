@@ -4,13 +4,15 @@
  */
 package com.laview.web.servlet.action;
 
+import java.lang.reflect.Field;
+
 import org.apache.log4j.Logger;
 
 import com.laview.commons.web.RequestMethod;
+import com.laview.container.context.annotation.Autowired;
+import com.laview.container.core.BeanContainerFactory;
 import com.laview.web.servlet.ServletData;
-import com.laview.web.servlet.action.config.UrlInterceptorMethodMapping;
 import com.laview.web.servlet.action.config.UrlMethodInfo;
-import com.laview.web.servlet.action.config.UrlMethodMapping;
 import com.laview.web.servlet.action.config.UrlMethodMappings;
 import com.laview.web.servlet.action.iterceptor.InterceptContext;
 import com.laview.web.servlet.action.iterceptor.RequestInterceptorFactory;
@@ -65,6 +67,9 @@ public class ActionExecuteProxy {
 				
 				//方法的参数数组
 				actionContext.setMethodArgs(args);
+				
+				//自动注入Autowired的Service到Action实例
+				setActionInstanceAutowiredField(actionContext);
 				//执行 Action 方法
 				Object actionResult = method.getMethod().invoke(actionContext.getActionInstance(), args);
 				actionContext.setActionResult(actionResult);
@@ -74,6 +79,24 @@ public class ActionExecuteProxy {
 			}else{
 				//返回中止结果
 				actionContext.setActionResult(WebResponseConstants.SC_FORBIDDEN);
+			}
+		}
+	}
+
+	/**
+	 *  自动注入Autowired的Service到Action实例
+	 *  
+	 * @param actionContext
+	 * @throws Exception
+	 * @throws IllegalAccessException
+	 */
+	private void setActionInstanceAutowiredField(ActionExecuteContext actionContext)
+			throws Exception, IllegalAccessException {
+		Field[] fields = actionContext.getActionInstance().getClass().getDeclaredFields();
+		for(Field field:fields){
+			if(field.isAnnotationPresent(Autowired.class)){
+				field.setAccessible(true);
+				field.set(actionContext.getActionInstance(), BeanContainerFactory.getBeanBy(field.getType()) );
 			}
 		}
 	}
