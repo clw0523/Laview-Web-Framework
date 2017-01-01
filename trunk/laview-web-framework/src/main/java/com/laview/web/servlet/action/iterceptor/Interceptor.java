@@ -59,7 +59,7 @@ public interface Interceptor {
 	 *
 	 * @param request
 	 * @param response
-	 * @param action
+	 * @param action HandlerException实例
 	 * @param exception
 	 */
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object action, Exception exception);
