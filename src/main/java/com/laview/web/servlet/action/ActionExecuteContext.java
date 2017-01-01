@@ -4,6 +4,7 @@
  */
 package com.laview.web.servlet.action;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +59,18 @@ public class ActionExecuteContext {
 	 * 最终的处理结果
 	 */
 	private ActionForward actionForward;
+	
+	/**
+	 * 执行action触发的异常，没有异常代表执行正常
+	 */
+	private Exception actionException;
+	
+	private boolean exceptonHandlerHasResponseBody = false;
+	
+	/**
+	 * action要执行的方法
+	 */
+	private Method method;
 	
 	/**
 	 * @param config
@@ -291,6 +304,30 @@ public class ActionExecuteContext {
 		builder.append(actionForward);
 		builder.append("]");
 		return builder.toString();
+	}
+
+	public Exception getActionException() {
+		return actionException;
+	}
+
+	public void setActionException(Exception actionException) {
+		this.actionException = actionException;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
+
+	public boolean isExceptonHandlerHasResponseBody() {
+		return exceptonHandlerHasResponseBody;
+	}
+
+	public void setExceptonHandlerHasResponseBody(boolean exceptonHandlerHasResponseBody) {
+		this.exceptonHandlerHasResponseBody = exceptonHandlerHasResponseBody;
 	}
 
 			

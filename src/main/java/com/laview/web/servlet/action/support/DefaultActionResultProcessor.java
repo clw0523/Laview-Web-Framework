@@ -40,7 +40,7 @@ public class DefaultActionResultProcessor implements ActionResultProcessor{
 			/**
 			 * 如果方法定义了 {@ResponseBody}，则返回结果将使用请求类型 来进行处理
 			 */
-			if(actionContext.defineResponseBody()){
+			if(actionContext.defineResponseBody()||actionContext.isExceptonHandlerHasResponseBody()){//第二次请求也要检查@ResponseBody
 				RequestContentType contentType = servletData.getContentType();
 				
 				switch(contentType){
