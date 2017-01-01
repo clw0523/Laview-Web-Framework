@@ -16,9 +16,11 @@ import com.laview.web.annotation.laview.Put;
 import com.laview.web.annotation.laview.Request;
 import com.laview.web.annotation.laview.WebBean;
 import com.laview.web.annotation.springmvc.Controller;
+import com.laview.web.annotation.springmvc.ControllerAdvice;
 import com.laview.web.annotation.springmvc.RequestMapping;
 import com.laview.web.servlet.action.config.processor.AfterAnnotationProcessor;
 import com.laview.web.servlet.action.config.processor.BeforeAnnotationProcessor;
+import com.laview.web.servlet.action.config.processor.ControllerAdviceProcessor;
 import com.laview.web.servlet.action.config.processor.ControllerProcessor;
 import com.laview.web.servlet.action.config.processor.DeleteProcessor;
 import com.laview.web.servlet.action.config.processor.GetProcessor;
@@ -57,6 +59,9 @@ public class ScanControllers implements ScanBean{
 		
 		//WebBean 注解
 		processorManager.addProcessor(WebBean.class, new WebBeanProcessor());
+		
+		//统一异常管理
+		processorManager.addProcessor(ControllerAdvice.class, new ControllerAdviceProcessor());
 	}
 	
 	

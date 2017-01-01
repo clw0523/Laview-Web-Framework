@@ -5,6 +5,9 @@
 package com.laview.web.servlet;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -16,19 +19,26 @@ import com.laview.commons.collections.ArrayUtils;
 import com.laview.commons.lang.PropertyUtils;
 import com.laview.commons.lang.ReflectUtils;
 import com.laview.commons.web.path.PathPair;
+import com.laview.container.context.annotation.Autowired;
+import com.laview.container.core.BeanContainerFactory;
+import com.laview.web.annotation.springmvc.ResponseBody;
 import com.laview.web.servlet.action.ActionExecuteContext;
 import com.laview.web.servlet.action.ActionExecuteProxy;
 import com.laview.web.servlet.action.ActionResultProcessor;
 import com.laview.web.servlet.action.ActionsFactory;
 import com.laview.web.servlet.action.config.ActionConfig;
 import com.laview.web.servlet.action.config.ActionConfigsManager;
+import com.laview.web.servlet.action.config.UrlMethodInfo;
 import com.laview.web.servlet.action.config.UrlMethodMappings;
+import com.laview.web.servlet.action.iterceptor.HandlerMethod;
 import com.laview.web.servlet.action.iterceptor.RequestInterceptorFactory;
 import com.laview.web.servlet.action.support.DefaultActionResultProcessor;
 import com.laview.web.servlet.commons.GlobalConfig;
 import com.laview.web.servlet.commons.WebResponseConstants;
 import com.laview.web.servlet.http.DefaultServletHttpRequestHandler;
 import com.laview.web.servlet.http.SimpleUrlHandlerMapping;
+import com.laview.web.servlet.method.ActionMethodParameterHandler;
+import com.laview.web.servlet.method.AnnotationMethodHandlerExceptionResolver;
 import com.laview.web.servlet.view.result.ActionForward;
 import com.laview.web.servlet.webbean.FieldConfig;
 import com.laview.web.servlet.webbean.WebBeanConfig;
@@ -63,6 +73,9 @@ public class DispatchManager {
 	 * 默认处理
 	 */
 	private DefaultServletHttpRequestHandler resourceHandler = new DefaultServletHttpRequestHandler();
+	
+	
+	private final AnnotationMethodHandlerExceptionResolver exceptionResolver = new AnnotationMethodHandlerExceptionResolver();
 	
 	/**
 	 * 系统自己不处理静态资源的分发
@@ -292,8 +305,61 @@ public class DispatchManager {
 	 * @param e 
 	 */
 	private void processException(ServletData servletData, ActionExecuteContext actionContext, Exception e) {
-		logger.debug("[LWF]==> 未处理 Exception", e);
-		e.printStackTrace();
+		logger.debug("[LWF]==> 处理 Exception", e);
+		//e.printStackTrace();
+		
+		logger.debug("[LWF]==> 匹配 Exception 交给@ControllerAdvice里面的@ExceptionHandler处理");
+		
+		try {
+			Object controllerAdviceInstance = ControllerAdviceManager.getControlleradviceinstance();
+			if(controllerAdviceInstance == null){
+				logger.debug("[LWF]==> 没有找到@ControllerAdvice的实例");
+				return;
+			}
+			//找到方法 method
+			Method method = exceptionResolver.findBestExceptionHandlerMethod(controllerAdviceInstance, e);
+			if(method == null){
+				logger.debug("[LWF]==> 没有找到@ControllerAdvice实例的ExceptionHandler方法");
+				return;
+			}
+			logger.debug("[LWF]==> 匹配 Exception 的方法是："+controllerAdviceInstance.getClass()+"."+method.getName());
+			
+			//获取参数方法 --- 根据方法参数 与 请求数据，将请求数据组装到成方法所需要的参数
+			//Object[] args = resolveHandlerArgument(servletData, actionContext);
+			ActionMethodParameterHandler methodInvoker = new ActionMethodParameterHandler(servletData);
+			Object[] args = methodInvoker.resolveHandlerArgument(actionContext,method);
+			
+			Field[] fields = controllerAdviceInstance.getClass().getDeclaredFields();
+			for(Field field:fields){
+				if(field.isAnnotationPresent(Autowired.class)){
+					field.setAccessible(true);
+					if(field.get(controllerAdviceInstance) == null){
+						field.set(controllerAdviceInstance, BeanContainerFactory.getBeanBy(field.getType()) );
+					}
+				}
+			}
+			//执行 Action 方法
+			logger.debug("[LWF]==>执行ExceptionHandler的方法");
+			Object actionResult = method.invoke(controllerAdviceInstance, args);
+			
+			actionContext.setActionResult(actionResult);
+			
+			Annotation responseBody = method.getAnnotation(ResponseBody.class);
+			if(responseBody != null){
+				actionContext.setExceptonHandlerHasResponseBody(true);
+			}
+			
+			//对 @WebBean 的注解渲染
+			renderModelToView(servletData, actionContext);
+			
+			//对结果进行处理，并返回内容给客户端
+			processActionForward(servletData, actionContext);
+			
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			logger.error("[LWF]==> ExceptionHandler处理出现异常",e1);
+		}
+		
 	}
 
 	/**
@@ -398,10 +464,13 @@ public class DispatchManager {
 	 */
 	private void triggerAfterCompletion(ServletData servletData, ActionExecuteContext actionContext, Exception exception) {
 		try{
+			Object action = actionContext.getActionInstance();
+			UrlMethodInfo methodInfo = (UrlMethodInfo)actionContext.getUrlMethodMapping();
+			
 			RequestInterceptorFactory.triggerAfterCompletion(
 					servletData.getRequest(),
 					servletData.getResponse(),
-					(actionContext != null ? actionContext.getActionInstance() : null),
+					(actionContext != null ? new HandlerMethod(action,methodInfo,actionContext.getMethodArgs(),actionContext.getActionResult()) : null),
 					exception
 					);
 		}catch(Exception e){

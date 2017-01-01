@@ -42,6 +42,8 @@ public class InterceptContext {
 	 * 执行 Action 的返回结果
 	 */
 	private Object actionResult;
+	
+	private Exception actionException;
 
 	/**
 	 * @param action
@@ -63,6 +65,15 @@ public class InterceptContext {
 		this.methodArgs = args;
 		this.actionResult = result;
 		this.servletData = servletData;
+	}
+	
+	public InterceptContext(ServletData servletData, Object action, UrlMethodInfo methodInfo, Object[] args, Object result,Exception e) {
+		this.action = action;
+		this.handleMethodInfo = methodInfo;
+		this.methodArgs = args;
+		this.actionResult = result;
+		this.servletData = servletData;
+		this.actionException = e;
 	}
 
 	/**
@@ -99,5 +110,13 @@ public class InterceptContext {
 	
 	public HttpServletResponse getHttpResponse(){
 		return this.servletData.getResponse();
+	}
+
+	public Exception getActionException() {
+		return actionException;
+	}
+
+	public void setActionException(Exception actionException) {
+		this.actionException = actionException;
 	}
 }

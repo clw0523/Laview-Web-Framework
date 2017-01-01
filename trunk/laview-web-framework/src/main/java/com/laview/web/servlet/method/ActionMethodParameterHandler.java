@@ -98,6 +98,56 @@ public class ActionMethodParameterHandler {
 		
 		return parameters.toArray(new Object[parameters.size()]);
 	}
+	
+	/**
+	 * 对指定方法Method 组建方法参数。 遍历方法的所有参数，并能过  WebResolveArgumentFactory 来将不同参数类型 交由 不同的组装类来装配
+	 * 
+	 * @param method
+	 * @return
+	 */
+	public Object[] resolveHandlerArgument(ActionExecuteContext actionContext,Method method) throws Exception{
+
+		//获取方法所有参数类型
+		UrlMethodMappings methodMapping = actionContext.getUrlMethodMapping();
+		//Method method = methodMapping.getMethod();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+
+		//记录最终的参数值
+		List<Object> parameters = new ArrayList<Object>();
+		
+		if(parameterTypes != null && parameterTypes.length > 0){
+			
+			//如果方法有参数，就要组织并注入参数
+			ParameterNameDiscoverer pnd = new LocalVariableTableParameterNameDiscoverer();
+			String[] parameterNames = pnd.getParameterNames(method); 
+			
+			//从 URL 中获取参数值
+			Map<String, String> pathVarValues = getPathVarValues(actionContext, methodMapping);
+			
+			for(int i=0; i < parameterTypes.length; i++){
+				ResolveArgumentContext context = ResolveArgumentContext.createBy( servletData, methodMapping, parameterTypes[i], parameterNames[i]);
+				context.setRequestMethodPath(actionContext.getRequestMethodPath());
+				
+				//参数值来自于其他地方，如 URL 或 RequestHeader
+				if(methodMapping.checkIsPathVariable(parameterTypes[i], parameterNames[i])){
+					context.setSourceValue(pathVarValues.get(parameterNames[i]));
+				}else if(methodMapping.checkIsRequestHeader(parameterTypes[i], parameterNames[i])){
+					context.setSourceValue(getRequestHeaderValue(parameterNames[i], methodMapping));
+				}else if(methodMapping.checkIsCookieValue(parameterTypes[i], parameterNames[i])){
+					context.setSourceValue(getCookieValueFrom(parameterNames[i], methodMapping));
+				}else if(methodMapping.checkIsSessionValue(parameterTypes[i], parameterNames[i])){
+					context.setSourceValue(getSessionValueFrom(parameterNames[i], methodMapping));
+				}
+				
+				//从 请求中获取 名称 parameterNames[i] 的值，并转换成 parameterTypes[i] 类型返回--- result 就是参数值
+				Object result = WebResolveArgumentFactory.resolveArgument(context);
+				
+				parameters.add(result);
+			}
+		}
+		
+		return parameters.toArray(new Object[parameters.size()]);
+	}
 
 	/**
 	 * 如果包含 URL 参数，就从 URL 中得到参数值

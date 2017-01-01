@@ -5,6 +5,7 @@
 package com.laview.web.servlet.action;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.log4j.Logger;
 
@@ -71,11 +72,28 @@ public class ActionExecuteProxy {
 				//自动注入Autowired的Service到Action实例
 				setActionInstanceAutowiredField(actionContext);
 				//执行 Action 方法
-				Object actionResult = method.getMethod().invoke(actionContext.getActionInstance(), args);
+				Object actionResult = null;
+				Exception actionException = null;
+				try {
+					actionResult = method.getMethod().invoke(actionContext.getActionInstance(), args);
+				} catch (Exception e) {
+					//e.printStackTrace();
+					if (e instanceof InvocationTargetException) {
+						actionException = (Exception)((InvocationTargetException)e).getTargetException();
+					}else{
+						actionException = e;
+					}
+				}
 				actionContext.setActionResult(actionResult);
+				actionContext.setActionException(actionException);
+				actionContext.setMethod(method.getMethod());
 				
-				//触发 Action 执行后事件
+				//触发 Action 执行后事件,执行完以后要抛出去异常
 				triggerAfterExecute(servletData, actionContext, args);
+				
+				if(actionException != null){
+					throw actionException;
+				}
 			}else{
 				//返回中止结果
 				actionContext.setActionResult(WebResponseConstants.SC_FORBIDDEN);
@@ -96,7 +114,9 @@ public class ActionExecuteProxy {
 		for(Field field:fields){
 			if(field.isAnnotationPresent(Autowired.class)){
 				field.setAccessible(true);
-				field.set(actionContext.getActionInstance(), BeanContainerFactory.getBeanBy(field.getType()) );
+				if(field.get(actionContext.getActionInstance()) == null){
+					field.set(actionContext.getActionInstance(), BeanContainerFactory.getBeanBy(field.getType()) );
+				}
 			}
 		}
 	}
@@ -175,7 +195,7 @@ public class ActionExecuteProxy {
 			action = actionContext.getActionInstance();
 			UrlMethodInfo methodInfo = (UrlMethodInfo)actionContext.getUrlMethodMapping();
 
-			RequestInterceptorFactory.triggerAfterProcess(new InterceptContext(servletData, action, methodInfo, args, actionContext.getActionResult()));
+			RequestInterceptorFactory.triggerAfterProcess(new InterceptContext(servletData, action, methodInfo, args, actionContext.getActionResult(),actionContext.getActionException()));
 			
 		}catch(Exception e){
 			WebFrameWorkLogger.error("[LWF]==> 触发 AfterExceute 拦截器失败，异常：", e);
