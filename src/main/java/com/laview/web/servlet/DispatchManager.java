@@ -109,11 +109,26 @@ public class DispatchManager {
 			doProcessStaticResource(servletData, pp);
 		}else{
 			if(interceptorNoStopRequest(servletData)){  //当前版本，只对动态资源进行拦截，不拦截静态资源
-				doProcessDynamicRequest(servletData);
+				//拦截以后，先看html开关，以及看看是不是html请求，如果是当做静态文件处理
+				if(GlobalConfig.isOpenDirectToHtml() && isHtmlRequest(servletData)){
+					logger.debug("[LWF]==> Html静态开关已打开：path="+servletData.getRequestPath());
+					doProcessStaticResource(servletData, null);
+				}else{
+					//真正的动态请求
+					doProcessDynamicRequest(servletData);
+				}
 			}
 		}
 	}
 	
+	private boolean isHtmlRequest(ServletData servletData) {
+		String path = servletData.getRequestPath();
+		if(path != null && path.endsWith(".html")){
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * 触发拦截器，检查请求是否被拦截 
 	 *
@@ -130,7 +145,8 @@ public class DispatchManager {
 	 * @param servletData
 	 */
 	private void doProcessStaticResource(ServletData servletData, PathPair pair){
-		logger.debug("[LWF]==> 静态文件请求：" + pair.getLaterPath() + "，全路径：" + pair.getPath());
+		if(pair != null)
+			logger.debug("[LWF]==> 静态文件请求：" + pair.getLaterPath() + "，全路径：" + pair.getPath());
 		
 		//DefaultServletHttpRequestHandler
 		//resourceHandler.setServletContext(servletData.getRequest().getServletContext());
@@ -476,6 +492,10 @@ public class DispatchManager {
 		}catch(Exception e){
 			ReflectUtils.convertReflectionExceptionToUnchecked(e);
 		}
+	}
+
+	public SimpleUrlHandlerMapping getUrlHandlerMapping() {
+		return urlHandlerMapping;
 	}
 
 }

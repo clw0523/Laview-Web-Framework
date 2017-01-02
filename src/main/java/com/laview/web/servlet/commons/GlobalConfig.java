@@ -10,6 +10,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import com.laview.commons.file.FilenameUtils;
+import com.laview.web.servlet.DispatchManager;
 
 /**
  * 全局配置
@@ -47,9 +48,16 @@ public final class GlobalConfig {
 	private static ServletContext context;
 	
 	/**
+	 * 应用名称
+	 */
+	private static String contextPath;
+	
+	/**
 	 * 是否开启 直接映射到 jsp 的开关，true 表示提供这项功能， false 表示不提供这项功能
 	 */
 	private static boolean openDirectToJsp = false;
+	
+	private static boolean openDirectToHtml = false;
 	
 	/**
 	 *
@@ -58,7 +66,7 @@ public final class GlobalConfig {
 	public static void initGlobalConfig(ServletConfig config) {
 		context = config.getServletContext();
 		realRootPath = context.getRealPath("/");
-
+		contextPath = context.getContextPath();
 	}
 
 	/**
@@ -161,6 +169,13 @@ public final class GlobalConfig {
 	public static boolean isOpenDirectToJsp() {
 		return openDirectToJsp;
 	}
+	
+	/**
+	 * @return the openDirectToHtml
+	 */
+	public static boolean isOpenDirectToHtml() {
+		return openDirectToHtml;
+	}
 
 	/**
 	 * @param openDirectToJsp the openDirectToJsp to set
@@ -168,7 +183,28 @@ public final class GlobalConfig {
 	public static void setOpenDirectToJsp(boolean openDirectToJsp) {
 		GlobalConfig.openDirectToJsp = openDirectToJsp;
 	}
+	
+	/**
+	 * @param openDirectToJsp the openDirectToJsp to set
+	 */
+	public static void setOpenDirectToHtml(boolean openDirectToHtml) {
+		GlobalConfig.openDirectToHtml = openDirectToHtml;
+	}
 
 	private GlobalConfig(){}
+	
+	private static DispatchManager dispatchManager;
+	
+	public static void addStaticResourceMapping(String key,String value) {
+		dispatchManager.getUrlHandlerMapping().addStaticResourceMapping(key, value);
+	}
+
+	public static void setDispatchManager(DispatchManager dispatchManager) {
+		GlobalConfig.dispatchManager = dispatchManager;
+	}
+
+	public static String getContextPath() {
+		return contextPath;
+	}
 
 }
