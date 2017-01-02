@@ -42,5 +42,9 @@ public class SimpleUrlHandlerMapping{
 		}
 		return null;
 	}
+	
+	public void addStaticResourceMapping(String key,String value){
+		staticResourceMapping.put(key, value);
+	}
 
 }
