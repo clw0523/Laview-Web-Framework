@@ -49,6 +49,7 @@ public class ServletDispatcher extends HttpServlet{
 		logger.info("[LWF]==> Servlet Init...");
 		initGlobalConfig(config);
 		dispatchManager = new DispatchManager(config.getServletContext());
+		addDispatchManagerToGlobalConfig();
 		
 		//执行框架使用者的初始化动作
 		EventBusServiceFactory.post(new ServletInitEvent());
@@ -60,6 +61,9 @@ public class ServletDispatcher extends HttpServlet{
 	 */
 	private void initGlobalConfig(ServletConfig config) {
 		GlobalConfig.initGlobalConfig(config);
+	}
+	private void addDispatchManagerToGlobalConfig() {
+		GlobalConfig.setDispatchManager(dispatchManager);
 	}
 
 	/* (non-Javadoc)
