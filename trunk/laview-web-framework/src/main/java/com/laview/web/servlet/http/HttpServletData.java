@@ -188,7 +188,7 @@ public class HttpServletData implements ServletData, Cookies {
 	 */
 	@Override
 	public void sendRedirect(String view) throws Exception {
-		response.sendRedirect(view);
+		response.sendRedirect(request.getContextPath()+view);//sendRedirect要加ContextPath
 	}
 	
 	/* (non-Javadoc)

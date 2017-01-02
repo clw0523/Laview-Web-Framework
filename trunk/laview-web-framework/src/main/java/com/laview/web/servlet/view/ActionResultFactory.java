@@ -5,19 +5,19 @@
 package com.laview.web.servlet.view;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
 
-import com.laview.commons.lang.ReflectUtils;
 import com.laview.web.servlet.ServletData;
 import com.laview.web.servlet.action.ActionExecuteContext;
 import com.laview.web.servlet.view.result.ActionForward;
 import com.laview.web.servlet.view.result.ActionResultHandler;
+import com.laview.web.servlet.view.result.DefaultHtmlForwardResult;
 import com.laview.web.servlet.view.result.DefaultJspResultHandler;
 import com.laview.web.servlet.view.result.FileDownloadResultHandler;
 import com.laview.web.servlet.view.result.ModelAndViewResultHandler;
+import com.laview.web.servlet.view.result.RedirectHtmlResultHandler;
 import com.laview.web.servlet.view.result.RedirectResultHandler;
 import com.laview.web.servlet.view.result.RedirectToActionHandler;
 import com.laview.web.servlet.view.result.ResponseStatusResultHandler;
@@ -43,6 +43,8 @@ public class ActionResultFactory {
 		actionResultHandlers.add(new ResponseStatusResultHandler());
 		actionResultHandlers.add(new FileDownloadResultHandler());
 		actionResultHandlers.add(new ModelAndViewResultHandler());
+		//新增一个Html的结果处理器
+		actionResultHandlers.add(new RedirectHtmlResultHandler());
 	}
 	
 	/**
@@ -78,7 +80,7 @@ public class ActionResultFactory {
 				break;
 			}
 		}
-		
+
 		if(hasDo){
 			context.setActionForward(forwardResult);
 			return true;
