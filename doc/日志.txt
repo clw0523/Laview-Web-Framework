@@ -1,3 +1,33 @@
+* 2017-01-02
+	*添加@ControllerAdvice注解，Action的统一异常处理。目前只提供全局Action的
+	*对应添加@ExceptionHandler注解，处理对应的异常。
+	
+	*添加redirectHtml结果处理handler，在action中可以返回字符串 "redirectHtml:index.html",表示重定向到webapp/viewroot/index.html
+	*添加html结果处理handler(跟redirectHtml同一个)，在action中可以返回字符串 "html:index.html",表示转到到viewroot/index.html
+
+	*GlobalConfig.openDirectToHtml开关,默认是关闭的，可以在ServletInitEvent事件处理中打开，例如：
+	@Observes
+	public void init(ServletInitEvent event){		
+		GlobalConfig.addStaticResourceMapping("/pages", "/pages");
+		GlobalConfig.addStaticResourceMapping("/assets", "/assets");
+		GlobalConfig.setViewRoot("/");
+		GlobalConfig.setOpenDirectToHtml(true);
+	}
+	openDirectToHtml打开后，动态请求中（非静态资源）先过了拦截器prepareProcess（通常用于是否登录的判断），再判断是否是html文件，如果是html文件，就当做是静态文件处理。不再进入action方法
+	@Override
+	public boolean prepareProcess(HttpServletRequest request, HttpServletResponse response) {
+	}
+	
+	
+	*增加了添加静态资源文件或文件夹的配置GlobalConfig.addStaticResourceMapping("/pages", "/pages");
+	
+	
+
+* 2016-12-24
+	*添加aop代理模块，对@Service注解的类的方法进行拦截，针对@Service类做一些事务的处理
+	*使用的时候直接用@Autowired注入到Action中
+
+
 
 * 2015-01-26
 
