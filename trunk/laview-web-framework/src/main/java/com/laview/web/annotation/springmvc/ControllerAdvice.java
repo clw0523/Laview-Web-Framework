@@ -13,10 +13,10 @@ import java.lang.annotation.Target;
 public @interface ControllerAdvice {
 
 	//@AliasFor("basePackages")
-	String[] value() default {};
+	String[] value() default {};//暂时还没用到
 
-	Class<?>[] basePackageClasses() default {};
+	Class<?>[] basePackageClasses() default {};//暂时还没用到
 
-	Class<? extends Annotation>[] annotations() default {};
+	Class<? extends Annotation>[] annotations() default {};//暂时还没用到
 
 }
