@@ -24,6 +24,7 @@ public class RedirectHtmlResultHandler extends AbstractActionResultHandler{
 	private final static Logger logger = Logger.getLogger(RedirectHtmlResultHandler.class);
 	
 	private final static String REDIRECT_HTML_PREFIX = "redirecthtml:";
+	private final static String FORWARD_HTML_PREFIX = "html:";//使用forward方式
 		
 	/* (non-Javadoc)
 	 * @see com.laview.common.web.struts.result.ActionResultHandler#processActionResult(java.lang.String, com.laview.common.web.struts.NativeWebRequest)
@@ -38,9 +39,17 @@ public class RedirectHtmlResultHandler extends AbstractActionResultHandler{
 		}else{
 			actionResult = context.actionResultAsString();
 		}
-		if(logger.isDebugEnabled())
-			logger.info("[Laview-Web-Struts]==> Redirect Html 操作 ..., actionResult=" + actionResult + ", HTML:" + actionResult.substring(REDIRECT_HTML_PREFIX.length()));
-		return new DefaultHtmlForwardResult(actionResult.substring(REDIRECT_HTML_PREFIX.length()),true);
+		//如果是redirect方式
+		if(actionResult.startsWith(REDIRECT_HTML_PREFIX)){
+			if(logger.isDebugEnabled())
+				logger.info("[Laview-Web-Struts]==> Redirect Html 操作 ..., actionResult=" + actionResult + ", HTML:" + actionResult.substring(REDIRECT_HTML_PREFIX.length()));
+			return new DefaultHtmlForwardResult(actionResult.substring(REDIRECT_HTML_PREFIX.length()),true);
+		}else{
+			if(logger.isDebugEnabled())
+				logger.info("[Laview-Web-Struts]==> Forward Html 操作 ..., actionResult=" + actionResult + ", HTML:" + actionResult.substring(FORWARD_HTML_PREFIX.length()));
+			return new DefaultHtmlForwardResult(actionResult.substring(FORWARD_HTML_PREFIX.length()));
+		}
+		
 	}
 
 	/* (non-Javadoc)
@@ -51,7 +60,7 @@ public class RedirectHtmlResultHandler extends AbstractActionResultHandler{
 		if(actionResult != null){
 			String r = getViewNameFrom(actionResult);
 			
-			return r.toLowerCase().startsWith(REDIRECT_HTML_PREFIX);
+			return r.toLowerCase().startsWith(REDIRECT_HTML_PREFIX) || r.toLowerCase().startsWith(FORWARD_HTML_PREFIX);
 		}
 		
 		return false;
