@@ -40,7 +40,7 @@ public class RedirectHtmlResultHandler extends AbstractActionResultHandler{
 			actionResult = context.actionResultAsString();
 		}
 		//如果是redirect方式
-		if(actionResult.startsWith(REDIRECT_HTML_PREFIX)){
+		if(actionResult.toLowerCase().startsWith(REDIRECT_HTML_PREFIX)){
 			if(logger.isDebugEnabled())
 				logger.info("[Laview-Web-Struts]==> Redirect Html 操作 ..., actionResult=" + actionResult + ", HTML:" + actionResult.substring(REDIRECT_HTML_PREFIX.length()));
 			return new DefaultHtmlForwardResult(actionResult.substring(REDIRECT_HTML_PREFIX.length()),true);
