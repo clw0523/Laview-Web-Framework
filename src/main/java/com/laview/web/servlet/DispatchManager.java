@@ -37,6 +37,7 @@ import com.laview.web.servlet.commons.GlobalConfig;
 import com.laview.web.servlet.commons.WebResponseConstants;
 import com.laview.web.servlet.http.DefaultServletHttpRequestHandler;
 import com.laview.web.servlet.http.SimpleUrlHandlerMapping;
+import com.laview.web.servlet.http.SimpleUrlHandlerMappingForHtml;
 import com.laview.web.servlet.method.ActionMethodParameterHandler;
 import com.laview.web.servlet.method.AnnotationMethodHandlerExceptionResolver;
 import com.laview.web.servlet.view.result.ActionForward;
@@ -68,6 +69,11 @@ public class DispatchManager {
 	 * URL 映射
 	 */
 	private SimpleUrlHandlerMapping urlHandlerMapping = new SimpleUrlHandlerMapping();
+	
+	/**
+	 * URL 映射
+	 */
+	private SimpleUrlHandlerMappingForHtml urlHandlerMappingForHtml = new SimpleUrlHandlerMappingForHtml();
 	
 	/**
 	 * 默认处理
@@ -110,8 +116,8 @@ public class DispatchManager {
 		}else{
 			if(interceptorNoStopRequest(servletData)){  //当前版本，只对动态资源进行拦截，不拦截静态资源
 				//拦截以后，先看html开关，以及看看是不是html请求，如果是当做静态文件处理
-				if(GlobalConfig.isOpenDirectToHtml() && isHtmlRequest(servletData)){
-					logger.debug("[LWF]==> Html静态开关已打开：path="+servletData.getRequestPath());
+				if(GlobalConfig.isOpenDirectToHtml() && isHtmlStaticMappingRequest(servletData)){
+					logger.debug("[LWF]==> Html开关已打开,请求静态文件：path="+servletData.getRequestPath());
 					doProcessStaticResource(servletData, null);
 				}else{
 					//真正的动态请求
@@ -121,9 +127,10 @@ public class DispatchManager {
 		}
 	}
 	
-	private boolean isHtmlRequest(ServletData servletData) {
-		String path = servletData.getRequestPath();
-		if(path != null && path.endsWith(".html")){
+	private boolean isHtmlStaticMappingRequest(ServletData servletData) {
+		//看看请求是否为静态资源For Html
+		PathPair pp2 = urlHandlerMappingForHtml.findStaticResourceMappingPath(servletData);
+		if(pp2 != null){
 			return true;
 		}
 		return false;
@@ -151,7 +158,7 @@ public class DispatchManager {
 		//DefaultServletHttpRequestHandler
 		//resourceHandler.setServletContext(servletData.getRequest().getServletContext());
 		resourceHandler.processActionResult(servletData, null);
-	}
+	}	
 	
 	/**
 	 * 处理请求
