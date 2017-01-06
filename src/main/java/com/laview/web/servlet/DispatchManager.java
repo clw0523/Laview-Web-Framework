@@ -117,10 +117,11 @@ public class DispatchManager {
 			if(interceptorNoStopRequest(servletData)){  //当前版本，只对动态资源进行拦截，不拦截静态资源
 				//拦截以后，先看html开关，以及看看是不是html请求，如果是当做静态文件处理
 				if(GlobalConfig.isOpenDirectToHtml() && isHtmlStaticMappingRequest(servletData)){
-					logger.debug("[LWF]==> Html开关已打开,请求静态文件：path="+servletData.getRequestPath());
+					logger.info("[LWF]==> Html开关已打开,请求静态文件：path="+servletData.getRequestPath());
 					doProcessStaticResource(servletData, null);
 				}else{
 					//真正的动态请求
+					logger.info("[LWF]==> 真正的动态请求：path="+servletData.getRequestPath());
 					doProcessDynamicRequest(servletData);
 				}
 			}
@@ -349,7 +350,7 @@ public class DispatchManager {
 			
 			//获取参数方法 --- 根据方法参数 与 请求数据，将请求数据组装到成方法所需要的参数
 			//Object[] args = resolveHandlerArgument(servletData, actionContext);
-			ActionMethodParameterHandler methodInvoker = new ActionMethodParameterHandler(servletData);
+			ActionMethodParameterHandler methodInvoker = new ActionMethodParameterHandler(servletData,e);//带异常过去
 			Object[] args = methodInvoker.resolveHandlerArgument(actionContext,method);
 			
 			Field[] fields = controllerAdviceInstance.getClass().getDeclaredFields();
