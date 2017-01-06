@@ -22,7 +22,6 @@ import com.laview.web.annotation.springmvc.RequestHeader;
 import com.laview.web.servlet.Cookies;
 import com.laview.web.servlet.ServletData;
 import com.laview.web.servlet.action.ActionExecuteContext;
-import com.laview.web.servlet.action.config.UrlMethodMapping;
 import com.laview.web.servlet.action.config.UrlMethodMappings;
 import com.laview.web.servlet.method.bind.ResolveArgumentContext;
 import com.laview.web.servlet.method.bind.WebResolveArgumentFactory;
@@ -42,15 +41,28 @@ public class ActionMethodParameterHandler {
 	 */
 	private final ServletData servletData;
 	
+	private final Exception actionException;
+	
 	/**
 	 * @param servletData
 	 */
 	public ActionMethodParameterHandler(ServletData servletData) {
 		this.servletData = servletData;
+		this.actionException = null;
+	}
+	
+	/**
+	 * @param servletData
+	 */
+	public ActionMethodParameterHandler(ServletData servletData,Exception actionException) {
+		this.servletData = servletData;
+		this.actionException = actionException;
 	}
 
 	/**
 	 * 组建方法参数。 遍历方法的所有参数，并能过  WebResolveArgumentFactory 来将不同参数类型 交由 不同的组装类来装配
+	 * 
+	 * 这个方法是组装Action方法
 	 * 
 	 * @param method
 	 * @return
@@ -102,6 +114,8 @@ public class ActionMethodParameterHandler {
 	/**
 	 * 对指定方法Method 组建方法参数。 遍历方法的所有参数，并能过  WebResolveArgumentFactory 来将不同参数类型 交由 不同的组装类来装配
 	 * 
+	 * 这个方法是组装ControllerAdvice里面ExceptionHandler方法的参数，带异常
+	 * 
 	 * @param method
 	 * @return
 	 */
@@ -139,8 +153,13 @@ public class ActionMethodParameterHandler {
 					context.setSourceValue(getSessionValueFrom(parameterNames[i], methodMapping));
 				}
 				
-				//从 请求中获取 名称 parameterNames[i] 的值，并转换成 parameterTypes[i] 类型返回--- result 就是参数值
-				Object result = WebResolveArgumentFactory.resolveArgument(context);
+				Object result = null;
+				if(parameterTypes[i].isAssignableFrom(Exception.class) && actionException != null){
+					result = actionException;
+				}else{
+					//从 请求中获取 名称 parameterNames[i] 的值，并转换成 parameterTypes[i] 类型返回--- result 就是参数值
+					result = WebResolveArgumentFactory.resolveArgument(context);
+				}
 				
 				parameters.add(result);
 			}
