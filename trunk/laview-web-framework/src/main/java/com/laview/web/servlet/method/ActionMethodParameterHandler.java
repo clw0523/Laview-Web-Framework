@@ -175,7 +175,7 @@ public class ActionMethodParameterHandler {
 	 * @param methodMapping
 	 */
 	private Map<String, String> getPathVarValues(ActionExecuteContext actionContext, UrlMethodMappings methodMapping) {
-		if(methodMapping.isRegexPattern()){
+		if(methodMapping != null && methodMapping.isRegexPattern()){
 			PathMatcher matcher = new AntPathMatcher();
 
 			return matcher.extractUriTemplateVariables(methodMapping.getPath(), actionContext.getRequestMethodPath());

@@ -16,6 +16,7 @@ import com.laview.commons.collections.MapUtils;
 import com.laview.commons.lang.ReflectUtils;
 import com.laview.commons.lang.StringUtils;
 import com.laview.commons.web.RequestContentType;
+import com.laview.commons.web.RequestMethod;
 import com.laview.commons.web.ServletUtils;
 import com.laview.web.servlet.Cookies;
 import com.laview.web.servlet.ServletData;
@@ -98,6 +99,15 @@ public class WebSimpleDataResolveArgument implements WebResolveArgument{
 		
 		if(argObject == null){
 			values = extractValuesFromRequestParameters(webRequest, argName);
+			
+			//如果是ajax put,post请求，参数数据可能在request body里面		
+			//put中文会乱码
+			/*if(MapUtils.isNullOrEmpty(values) 
+					&& (webRequest.getRequestMethod() == RequestMethod.PUT 
+					|| webRequest.getRequestMethod() == RequestMethod.POST)){
+				String json = ServletUtils.getRequestJsonBody(webRequest.getRequest());
+				values = MapUtils.getMapByUrlParams(json);
+			}*/
 			
 			if(WebBeanConfigs.beanIsWebBean(argType)){
 				//TODO: 要处理这里

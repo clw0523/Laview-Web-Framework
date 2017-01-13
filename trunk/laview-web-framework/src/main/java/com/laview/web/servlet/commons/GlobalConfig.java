@@ -39,6 +39,8 @@ public final class GlobalConfig {
 	 * 根目录 
 	 */
 	private static String realRootPath;
+	
+	private static boolean convertResult2JsonWithNull;
 
 	/**
 	 * 临时目录
@@ -205,6 +207,14 @@ public final class GlobalConfig {
 
 	public static String getContextPath() {
 		return contextPath;
+	}
+
+	public static boolean isConvertResult2JsonWithNull() {
+		return convertResult2JsonWithNull;
+	}
+
+	public static void setConvertResult2JsonWithNull(boolean convertResult2JsonWithNull) {
+		GlobalConfig.convertResult2JsonWithNull = convertResult2JsonWithNull;
 	}
 
 }
