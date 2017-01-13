@@ -17,6 +17,7 @@ import com.laview.web.context.WebApplicationContext;
 import com.laview.web.servlet.action.config.ActionConfig;
 import com.laview.web.servlet.action.config.UrlInterceptorMethodMapping;
 import com.laview.web.servlet.action.config.UrlMethodMappings;
+import com.laview.web.servlet.commons.GlobalConfig;
 import com.laview.web.servlet.util.MiscUtils;
 import com.laview.web.servlet.view.result.ActionForward;
 
@@ -134,7 +135,9 @@ public class ActionExecuteContext {
 	 * @return
 	 */
 	public String getRequestPath() {
-		return actionConfig.getRequestPath();
+		if(actionConfig != null)
+			return actionConfig.getRequestPath();
+		return null;
 	}
 
 	/**
@@ -265,6 +268,9 @@ public class ActionExecuteContext {
 	 * @return
 	 */
 	public String actionResultAsJson() {
+		if(GlobalConfig.isConvertResult2JsonWithNull()){
+			return MiscUtils.convert2JsonWithNull(actionResult);
+		}
 		return MiscUtils.convert2Json(actionResult);
 	}
 

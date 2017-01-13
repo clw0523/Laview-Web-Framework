@@ -222,8 +222,9 @@ public class MapToObject {
 				result = NumberUtils.toWrapperType("0", target);
 		}else if(ClassUtils.isPrimitiveWrapperType(target) && !values.getClass().isArray()){
 			result = NumberUtils.toPrimitiveWrapperType(result.toString(), target);
-			if(result == null)
-				result = NumberUtils.toPrimitiveWrapperType("0", target);
+			//如果是空串，得到result为null，就不要转0了，这里是Long Integer Double对象为null
+			//if(result == null)
+			//	result = NumberUtils.toPrimitiveWrapperType("0", target);
 			
 		}else if(target.isEnum()) {
 			

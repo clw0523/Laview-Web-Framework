@@ -32,7 +32,7 @@ import com.laview.web.servlet.method.bind.WebResolveArgument;
  */
 public class WebStandardTypeResolveArgument implements WebResolveArgument {
 
-	private static final Logger logger = Logger.getLogger(BaseTypeResolveArgument.class);
+	private static final Logger logger = Logger.getLogger(WebStandardTypeResolveArgument.class);
 	
 	private static final Set<Class<?>> handlerTypes = new HashSet<Class<?>>(){{
 		add(HttpServletRequest.class);
