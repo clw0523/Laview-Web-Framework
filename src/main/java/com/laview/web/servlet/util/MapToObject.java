@@ -84,6 +84,11 @@ public class MapToObject {
 			if(StringUtils.stringIsEmpty(propertyName))
 				continue;
 			
+			//处理中括号的级联，laview 2017-01-15 如果是classItems[textbooks]则改为classItems.textbooks
+			if(propertyName.contains("[") && propertyName.contains("]")){
+				propertyName = propertyName.replace("]", "").replace("[", ".");
+			}
+			
 			//取这个属性对应的值
 			PropertyInfo propInfo = new PropertyInfo();
 			propInfo.propertyName = propertyName;       //属性名
@@ -126,11 +131,13 @@ public class MapToObject {
 			if(field != null){
 				//尝试从对象中读取这个属性值 
 				Object fieldObject = ReflectUtils.invokeReadMethod(valueObject, fieldName);
+				//PropertyUtils.getPropertyValue(field, property, defaultValue)
 				
 				//这是目标对象的属性
 				//如果这个属性值还没有，就需要创建一个，这样对能进行后续的，对此对象的属性进行赋值，这里是处理自定义类的属性，要对这样的属性赋值，首先就要创建一个对象
 				if(fieldObject == null){
-					fieldObject = field.getDeclaringClass().newInstance();
+					//fieldObject = field.getDeclaringClass().newInstance();//这里是不是错的？
+					fieldObject = field.getType().newInstance();
 					ReflectUtils.invokeWriteMethod(valueObject, fieldName, new Object[]{fieldObject});
 				}
 				
