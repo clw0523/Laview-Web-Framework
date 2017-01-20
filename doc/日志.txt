@@ -1,3 +1,41 @@
+* 2017-01-16 
+	**BaseClassRequestAnnotation
+		//如果path不是/开头，就加上
+			if(!requestPath.startsWith("/")){
+				requestPath = "/"+requestPath;
+			}
+	**RequestMappingProcessor
+		//为了适应spring mvc 方法注解，RequestMapping中添加path
+
+* 2017-01-15 修复bug MapToObject 中processPropertyValue(PropertyInfo propInfo)方法：
+		//这是目标对象的属性
+		//如果这个属性值还没有，就需要创建一个，这样对能进行后续的，对此对象的属性进行赋值，这里是处理自定义类的属性，要对这样的属性赋值，首先就要创建一个对象
+		if(fieldObject == null){
+			//fieldObject = field.getDeclaringClass().newInstance();//这里是不是错的？
+			fieldObject = field.getType().newInstance();
+			ReflectUtils.invokeWriteMethod(valueObject, fieldName, new Object[]{fieldObject});
+		}
+
+
+
+
+
+
+
+* 2017-01-07 前端ajax提交的参数id位空串“”时，获取参数Long id应为null，而不是0，String id才会是空串，定位com.laview.web.servlet.util.MapToObject 225行
+			
+			com.laview.web.servlet.method.bind.argument.WebSimpleDataResolveArgument
+			
+			//如果是ajax put,post请求，参数数据可能在request body里面			
+			if(MapUtils.isNullOrEmpty(values) 
+					&& (webRequest.getRequestMethod() == RequestMethod.PUT 
+					|| webRequest.getRequestMethod() == RequestMethod.POST)){
+				String json = ServletUtils.getRequestJsonBody(webRequest.getRequest());
+				values = MapUtils.getMapByUrlParams(json);
+			}
+
+
+
 * 2017-01-02
 	*添加@ControllerAdvice注解，Action的统一异常处理。目前只提供全局Action的
 	*对应添加@ExceptionHandler注解，处理对应的异常。
