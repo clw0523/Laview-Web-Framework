@@ -70,7 +70,7 @@ public class ActionExecuteProxy {
 				actionContext.setMethodArgs(args);
 				
 				//自动注入Autowired的Service到Action实例
-				setActionInstanceAutowiredField(actionContext);
+				setActionInstanceAutowiredField(actionContext.getActionInstance());
 				//执行 Action 方法
 				Object actionResult = null;
 				Exception actionException = null;
@@ -108,14 +108,15 @@ public class ActionExecuteProxy {
 	 * @throws Exception
 	 * @throws IllegalAccessException
 	 */
-	private void setActionInstanceAutowiredField(ActionExecuteContext actionContext)
+	private void setActionInstanceAutowiredField(Object actionInstance)
 			throws Exception, IllegalAccessException {
-		Field[] fields = actionContext.getActionInstance().getClass().getDeclaredFields();
+		Field[] fields = actionInstance.getClass().getDeclaredFields();
 		for(Field field:fields){
 			if(field.isAnnotationPresent(Autowired.class)){
 				field.setAccessible(true);
-				if(field.get(actionContext.getActionInstance()) == null){
-					field.set(actionContext.getActionInstance(), BeanContainerFactory.getBeanBy(field.getType()) );
+				if(field.get(actionInstance) == null){
+					Object serviceBean = BeanContainerFactory.getBeanInfoProxyInstanceIfHas(field.getType());//有代理取代理
+					field.set(actionInstance, serviceBean );
 				}
 			}
 		}

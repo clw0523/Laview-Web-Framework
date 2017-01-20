@@ -29,6 +29,8 @@ public @interface RequestMapping {
 
 	String value() default "";
 	
+	String path() default "";//为了和spring mvc匹配
+	
 	/**
 	 * 用来方法来区分同一个请求
 	 *

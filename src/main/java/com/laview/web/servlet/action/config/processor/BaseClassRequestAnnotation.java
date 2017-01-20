@@ -35,6 +35,11 @@ public class BaseClassRequestAnnotation {
 //			logger.error("[Laview-Web-Framework]==> URL[" + requestPath +"] 已经存在，将忽略这个映射");
 //		}else{
 			
+			//如果path不是/开头，就加上
+			if(!requestPath.startsWith("/")){
+				requestPath = "/"+requestPath;
+			}
+		
 			ActionConfig config = new ActionConfig(requestPath);
 			config.setType(clazz.getCanonicalName());
 			config.setActionId(clazz.getCanonicalName());
