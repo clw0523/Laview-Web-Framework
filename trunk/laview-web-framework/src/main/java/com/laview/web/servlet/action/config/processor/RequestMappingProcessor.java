@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import org.apache.log4j.Logger;
 
 import com.laview.commons.annotation.process.AnnotationProcessor;
+import com.laview.commons.lang.StringUtils;
 import com.laview.commons.web.ServletUtils;
 import com.laview.web.annotation.springmvc.RequestMapping;
 import com.laview.web.servlet.action.ScanControllers;
@@ -40,8 +41,26 @@ public class RequestMappingProcessor extends BaseClassRequestAnnotation implemen
 	@Override
 	public void process(Object object, Annotation annotation) {
 		RequestMapping requestMapping = (RequestMapping)annotation;
-		
+		//laview 2017-01-16
+		String requestMapping_value = requestMapping.value();
+		if(StringUtils.isEmpty(requestMapping_value) && StringUtils.notEmpty(requestMapping.path())){
+			requestMapping_value = requestMapping.path();
+		}
 		if(object instanceof Method){
+			Method method = (Method)object;
+			ActionConfig config = ActionConfigsManager.getActionConfigByActionId(method.getDeclaringClass().getCanonicalName());
+			if(config != null){
+				config.addMethodMapping(ServletUtils.deletePathDotSuffix(requestMapping_value), method, requestMapping.method());
+				logger.debug( String.format("URL [%s] <------> %s.%s", ServletUtils.deletePathDotSuffix(requestMapping_value), config.getType(), method.getName() ));
+			}
+		}else if(object instanceof Class){
+			Class<?> clazz = (Class<?>)object;
+
+			addActionConfig(requestMapping_value, clazz);
+		}
+		
+		/*//原来代码
+		 * if(object instanceof Method){
 			Method method = (Method)object;
 			ActionConfig config = ActionConfigsManager.getActionConfigByActionId(method.getDeclaringClass().getCanonicalName());
 			if(config != null){
@@ -52,7 +71,7 @@ public class RequestMappingProcessor extends BaseClassRequestAnnotation implemen
 			Class<?> clazz = (Class<?>)object;
 
 			addActionConfig(requestMapping.value(), clazz);
-		}
+		}*/
 	}
 
 }
