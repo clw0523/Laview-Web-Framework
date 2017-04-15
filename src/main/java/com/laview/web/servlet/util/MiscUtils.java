@@ -28,7 +28,7 @@ public class MiscUtils {
 	public static String convert2Json(Object content){
 		SerializeConfig mapping = new SerializeConfig();
 		
-		mapping.put(Date.class, new SimpleDateFormatSerializer("yyyy-MM-dd HH:mm:ss"));
+		//mapping.put(Date.class, new SimpleDateFormatSerializer("yyyy-MM-dd HH:mm:ss"));//由每个字段的@JSONField控制
 		return JSON.toJSONString(content, mapping);		
 	}
 	
@@ -39,7 +39,8 @@ public class MiscUtils {
 	 * @return
 	 */
 	public static String convert2JsonWithNull(Object content){
-		return JSON.toJSONStringWithDateFormat(content, "yyyy-MM-dd HH:mm:ss", SerializerFeature.WriteMapNullValue);
+		//return JSON.toJSONStringWithDateFormat(content, "yyyy-MM-dd HH:mm:ss", SerializerFeature.WriteMapNullValue);
+		return JSON.toJSONString(content, SerializerFeature.WriteMapNullValue);
 	}
 	
 }
