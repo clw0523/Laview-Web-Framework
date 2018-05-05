@@ -44,8 +44,11 @@ public class DefaultActionResultProcessor implements ActionResultProcessor{
 				RequestContentType contentType = servletData.getContentType();
 				
 				switch(contentType){
-					case REQUEST_HTML:
-					case REQUEST_TEXT:{
+					case REQUEST_HTML:{//text/html
+						writeContentToResponse(servletData, actionContext.actionResultAsJson());
+						return true;
+					}
+					case REQUEST_TEXT:{//text/plain RequestContentType为这个时，直接返回原文
 						writeContentToResponse(servletData, actionContext.actionResultAsString());
 						return true;
 					}
